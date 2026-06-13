@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terrible Traffic</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="panel">
+      <h1>Terrible&nbsp;Traffic</h1>
+
+      <section class="group">
+        <label class="field">
+          <span>Scenario</span>
+          <!-- Options are populated from the scenario registry in main.js -->
+          <select id="scenario"></select>
+        </label>
+        <div class="buttons">
+          <button id="playPause">Pause</button>
+          <button id="reset">Reset</button>
+        </div>
+        <button id="disturb" class="wide">Tap the brakes (1 car)</button>
+      </section>
+
+      <section class="group">
+        <h2>Traffic</h2>
+        <div id="trafficControls"></div>
+      </section>
+
+      <section class="group">
+        <h2>Driver model (IDM)</h2>
+        <div id="driverControls"></div>
+      </section>
+
+      <section class="group">
+        <h2>Simulation</h2>
+        <div id="simControls"></div>
+      </section>
+
+      <section class="group stats">
+        <h2>Stats</h2>
+        <div id="stats"></div>
+      </section>
+    </aside>
+
+    <main id="stage">
+      <canvas id="canvas"></canvas>
+    </main>
+  </div>
+
+  <!-- Load order matters: each file attaches to the global TT namespace -->
+  <script src="js/config.js"></script>
+  <script src="js/geometry.js"></script>
+  <script src="js/vehicle.js"></script>
+  <script src="js/road.js"></script>
+  <script src="js/intersection.js"></script>
+  <script src="js/scenarios.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
