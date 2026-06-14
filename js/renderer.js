@@ -38,6 +38,7 @@
       const ctx = this.ctx;
       const world = sim.world;
       const t = this.layout(world.bounds);
+      this._lastTransform = t; // exposed for builder-ui coordinate conversion
       const X = x => t.ox + x * t.scale;
       const Y = y => t.oy + y * t.scale;
 
@@ -94,6 +95,11 @@
           ctx.fillRect(-w, -h / 2, w, h); // anchored at the front bumper (s)
           ctx.restore();
         }
+      }
+
+      // Builder overlay: grid, node icons, ghost preview.
+      if (world.isBuilderWorld && TT.builderUI) {
+        TT.builderUI.renderOverlay(ctx, t);
       }
     }
 

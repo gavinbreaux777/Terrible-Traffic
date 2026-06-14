@@ -23,7 +23,8 @@
       this.s = s;            // arc-length position along current road (m)
       this.v = v || 0;       // speed (m/s)
       this.accel = 0;        // last computed acceleration (m/s^2), for coloring
-      this.route = [];       // queue of road ids to follow (intersection mode)
+      this.route = null;     // [nodeKey, ...] waypoints for builder-mode routing, or null
+      this.destEdge = null;  // destination edge key, or null
       this.brakeTimer = 0;   // >0 forces a hard brake (the "tap the brakes" tool)
       this.hue = 210;        // base color; renderer shifts by speed
     }

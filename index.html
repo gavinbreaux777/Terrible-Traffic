@@ -12,11 +12,35 @@
       <h1>Terrible&nbsp;Traffic</h1>
 
       <section class="group">
-        <label class="field">
-          <span>Scenario</span>
-          <!-- Options are populated from the scenario registry in main.js -->
-          <select id="scenario"></select>
-        </label>
+        <div class="mode-tabs">
+          <button id="tabScenario">Scenarios</button>
+          <button id="tabBuild">Build</button>
+        </div>
+
+        <div id="scenarioPanel">
+          <label class="field">
+            <span>Scenario</span>
+            <!-- Options are populated from the scenario registry in main.js -->
+            <select id="scenario"></select>
+          </label>
+        </div>
+
+        <div id="builderToolbar" style="display:none">
+          <div class="tool-palette">
+            <button data-tool="road" class="active">Road</button>
+            <button data-tool="fourway">4-Way</button>
+            <button data-tool="tee_N">T-N</button>
+            <button data-tool="tee_E">T-E</button>
+            <button data-tool="tee_S">T-S</button>
+            <button data-tool="tee_W">T-W</button>
+            <button data-tool="roundabout">Circle</button>
+            <button data-tool="erase">Erase</button>
+            <button data-tool="entry">Entry</button>
+            <button data-tool="exit">Exit</button>
+            <button data-tool="entryexit">E/X</button>
+          </div>
+        </div>
+
         <div class="buttons">
           <button id="playPause">Pause</button>
           <button id="reset">Reset</button>
@@ -57,6 +81,10 @@
   <script src="js/road.js"></script>
   <script src="js/intersection.js"></script>
   <script src="js/scenarios.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/builder-model.js"></script>
+  <script src="js/builder-world.js"></script>
+  <script src="js/builder-ui.js"></script>
   <script src="js/simulation.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/ui.js"></script>

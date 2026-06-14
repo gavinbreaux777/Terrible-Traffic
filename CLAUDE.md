@@ -14,6 +14,12 @@ Just open `index.html`. There is no build, lint, or test tooling. Scripts are
 loaded as classic `<script>` tags (not ES modules) specifically so the page
 works without a local server.
 
+## Reference Docs
+
+- **`CODE-SUMMARY.md`** — read this first when you need to understand code structure,
+  file responsibilities, key data shapes, or invariants. Covers every file with
+  constructors, properties, and method signatures.
+
 ## Architecture
 
 Every file is an IIFE that hangs its exports off the global `window.TT`
@@ -73,3 +79,8 @@ Data flow per frame (`js/main.js`): fixed sub-step loop → `Simulation.step(dt)
   circulating cars claim space before `hasRoom` is checked for entries).
 - The two-pass step order in `simulation.js` is load-bearing for stable physics
   — don't collapse it into a single compute+integrate pass.
+
+## How Claude Code Should Work
+
+- Before writing any code, present the plan for what you are about to write.
+- If you are unsure about anything, do not make assumptions, find the information or ask

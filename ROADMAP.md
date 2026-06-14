@@ -8,6 +8,9 @@ Planned features and ideas for Terrible-Traffic.
 - Multi-lane intersections with turn lanes
 - Railroad crossings with timed gates
 - Merge/diverge zones (on-ramps, off-ramps)
+- 4 way stop
+- 3 way stop
+- 4 way intesection where only one direction stops
 
 ## Add a Gaming Mode
 

@@ -18,12 +18,17 @@
     let running = true;
     let last = performance.now();
     let statAccum = 0;
+    let builderMode = false;
 
     const statsEl = document.getElementById('stats');
     const playBtn = document.getElementById('playPause');
     const resetBtn = document.getElementById('reset');
     const disturbBtn = document.getElementById('disturb');
     const scenarioSel = document.getElementById('scenario');
+    const scenarioTabBtn = document.getElementById('tabScenario');
+    const buildTabBtn = document.getElementById('tabBuild');
+    const builderToolbar = document.getElementById('builderToolbar');
+    const scenarioPanel = document.getElementById('scenarioPanel');
 
     // Populate the scenario dropdown straight from the registry, so adding a
     // scenario in scenarios.js makes it appear here with no edits.
@@ -35,10 +40,11 @@
     }
     scenarioSel.value = sim.scenarioName;
 
-    const scenarioDef = () => TT.scenarios[sim.scenarioName];
+    const scenarioDef = () => builderMode
+      ? { caps: ['spawns'], disturb: true }
+      : TT.scenarios[sim.scenarioName];
 
     const onControlChange = (key) => {
-      // Changing how many cars sit on the ring means rebuilding the loop.
       if (key === 'carCount' && scenarioDef().caps.includes('fixedCount')) sim.reset();
     };
 
@@ -48,19 +54,64 @@
     }
     refreshPanel();
 
+    // Builder mode: rebuild sim from the current grid state.
+    function rebuild() {
+      TT.builderWorld.apply(sim);
+      refreshPanel();
+    }
+
+    // Mode toggle
+    function enterBuilderMode() {
+      builderMode = true;
+      scenarioPanel.style.display = 'none';
+      builderToolbar.style.display = '';
+      scenarioTabBtn.classList.remove('active');
+      buildTabBtn.classList.add('active');
+      TT.builderUI.attach(canvas, TT.builderModel, rebuild, () => renderer._lastTransform);
+      rebuild();
+    }
+
+    function enterScenarioMode() {
+      builderMode = false;
+      TT.builderUI.detach(canvas);
+      scenarioPanel.style.display = '';
+      builderToolbar.style.display = 'none';
+      scenarioTabBtn.classList.add('active');
+      buildTabBtn.classList.remove('active');
+      sim.build(scenarioSel.value);
+      refreshPanel();
+    }
+
+    scenarioTabBtn.addEventListener('click', () => { if (builderMode) enterScenarioMode(); });
+    buildTabBtn.addEventListener('click', () => { if (!builderMode) enterBuilderMode(); });
+
+    // Tool palette
+    document.querySelectorAll('[data-tool]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        TT.builderUI.setTool(btn.dataset.tool);
+        document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
     playBtn.addEventListener('click', () => {
       running = !running;
       playBtn.textContent = running ? 'Pause' : 'Play';
       if (running) last = performance.now();
     });
 
-    resetBtn.addEventListener('click', () => sim.reset());
+    resetBtn.addEventListener('click', () => {
+      if (builderMode) rebuild(); else sim.reset();
+    });
     disturbBtn.addEventListener('click', () => sim.disturb());
 
     scenarioSel.addEventListener('change', () => {
       sim.build(scenarioSel.value);
       refreshPanel();
     });
+
+    // Start in scenario mode with the tab marked active.
+    scenarioTabBtn.classList.add('active');
 
     function frame(now) {
       let dt = (now - last) / 1000;

@@ -74,15 +74,17 @@
         const leaving = road.vehicles.filter(v => v.s >= road.length);
         for (const veh of leaving) {
           const overflow = veh.s - road.length;
-          const next = this.pickOutgoing(road, carLen);
+          const next = this.pickOutgoing(road, carLen, veh);
           road.remove(veh);
           if (next) {
             veh.s = overflow;
             next.add(veh);
-          } else if (road.outgoing.length === 0) {
-            this.exited++; // reached a sink
+          } else if (road.outgoing.length === 0 &&
+                     (!this.world.hasExplicitPortals || road._isSink)) {
+            this.exited++; // reached a designated sink (or auto-mode dead-end)
           } else {
-            // Outgoing exists but is blocked: hold at the stop line, wait.
+            // Outgoing exists but is blocked, or explicit-portal mode with no
+            // valid exit here: hold at the stop line and wait.
             veh.s = road.length;
             veh.v = 0;
             road.add(veh);
@@ -91,11 +93,22 @@
       }
     }
 
-    // Pick a random outgoing road that has room near its start.
-    pickOutgoing(road, carLen) {
+    // Pick the next outgoing road for the vehicle at the front of `road`.
+    // For builder-mode routed vehicles, delegates to the router; falls back
+    // to random selection if the router returns null or no route is set.
+    pickOutgoing(road, carLen, veh) {
       if (!road.outgoing.length) return null;
       const candidates = road.outgoing.filter(r => this.hasRoom(r, carLen));
       if (!candidates.length) return null;
+
+      // Routed selection for builder worlds: follow the leaving vehicle's
+      // predetermined route. If a route exists but the next waypoint isn't yet
+      // reachable (outgoing blocked), do NOT fall back to a random road — that
+      // would send the car off its planned path. Return null to make it wait.
+      if (this.world.isBuilderWorld && veh && veh.route && veh.route.length) {
+        return TT.router.nextRoad(veh, candidates); // may be null → car waits
+      }
+
       return candidates[(Math.random() * candidates.length) | 0];
     }
 
@@ -109,6 +122,46 @@
     trySpawn(road, carLen) {
       if (!this.hasRoom(road, carLen)) return;
       const veh = new TT.Vehicle(0, this.params.desiredSpeed * 0.6);
+
+      // Assign a route for builder-mode worlds.
+      if (this.world.isBuilderWorld && road._nkTo && this.world.navGraph) {
+        const exitNodes = this.world.exitNodes;
+        const useExits = this.world.hasExplicitPortals;
+
+        if (useExits) {
+          // If there are no exit nodes at all, nowhere to route — suppress spawn.
+          if (!exitNodes || exitNodes.length === 0) return;
+          // Explicit exit nodes: pick a random reachable exit and route to it.
+          // Shuffle so we don't always try the same one first.
+          const shuffled = exitNodes.slice().sort(() => Math.random() - 0.5);
+          let assigned = false;
+          for (const destNk of shuffled) {
+            if (destNk === road._nkTo) continue; // already at an exit node
+            const route = TT.router.findRoute(this.world.navGraph, road._nkTo, destNk);
+            if (route && route.length > 1) {
+              veh.route = route.slice(1);
+              veh.destEdge = destNk;
+              assigned = true;
+              break;
+            }
+          }
+          // No reachable exit — suppress the spawn entirely.
+          if (!assigned) return;
+        } else {
+          // No explicit exits: route toward another source (legacy behaviour).
+          const sources = this.world.sources;
+          const otherSources = sources.filter(s => s !== road && s._nkTo);
+          if (otherSources.length) {
+            const dest = otherSources[(Math.random() * otherSources.length) | 0];
+            const route = TT.router.findRoute(this.world.navGraph, road._nkTo, dest._nkTo);
+            if (route && route.length > 1) {
+              veh.route = route.slice(1);
+              veh.destEdge = dest._nkTo;
+            }
+          }
+        }
+      }
+
       road.add(veh);
     }
 
