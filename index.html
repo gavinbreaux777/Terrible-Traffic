@@ -23,50 +23,70 @@
             <!-- Options are populated from the scenario registry in main.js -->
             <select id="scenario"></select>
           </label>
+          <div class="buttons">
+            <button id="playPause">Pause</button>
+            <button id="reset">Reset</button>
+          </div>
+          <button id="disturb" class="wide">Tap the brakes (1 car)</button>
         </div>
 
         <div id="builderToolbar" style="display:none">
-          <div class="tool-palette">
-            <button data-tool="road" class="active">Road</button>
-            <button data-tool="fourway">4-Way</button>
-            <button data-tool="tee_N">T-N</button>
-            <button data-tool="tee_E">T-E</button>
-            <button data-tool="tee_S">T-S</button>
-            <button data-tool="tee_W">T-W</button>
-            <button data-tool="roundabout">Circle</button>
-            <button data-tool="erase">Erase</button>
-            <button data-tool="entry">Entry</button>
-            <button data-tool="exit">Exit</button>
-            <button data-tool="entryexit">E/X</button>
-          </div>
+          <details class="tool-group" open>
+            <summary>Road &amp; Erase</summary>
+            <div class="tool-palette">
+              <button data-tool="road" class="active">Road</button>
+              <button data-tool="erase">Erase</button>
+            </div>
+          </details>
+          <details class="tool-group" open>
+            <summary>Intersections</summary>
+            <div class="tool-palette">
+              <button data-tool="fourway">4-Way</button>
+              <button data-tool="tee_N">T-N</button>
+              <button data-tool="tee_E">T-E</button>
+              <button data-tool="tee_S">T-S</button>
+              <button data-tool="tee_W">T-W</button>
+              <button data-tool="roundabout">Circle</button>
+            </div>
+          </details>
+          <details class="tool-group" open>
+            <summary>Entries &amp; Exits</summary>
+            <div class="tool-palette">
+              <button data-tool="entry">Entry</button>
+              <button data-tool="exit">Exit</button>
+              <button data-tool="entryexit">E/X</button>
+            </div>
+          </details>
+          <details class="tool-group" open>
+            <summary>Simulate</summary>
+            <div class="buttons">
+              <button id="playPauseBuild">Pause</button>
+              <button id="resetBuild">Reset</button>
+            </div>
+            <button id="disturbBuild" class="wide">Tap the brakes (1 car)</button>
+          </details>
         </div>
-
-        <div class="buttons">
-          <button id="playPause">Pause</button>
-          <button id="reset">Reset</button>
-        </div>
-        <button id="disturb" class="wide">Tap the brakes (1 car)</button>
       </section>
 
-      <section class="group">
-        <h2>Traffic</h2>
-        <div id="trafficControls"></div>
-      </section>
-
-      <section class="group">
-        <h2>Driver model (IDM)</h2>
-        <div id="driverControls"></div>
-      </section>
-
-      <section class="group">
-        <h2>Simulation</h2>
-        <div id="simControls"></div>
-      </section>
-
-      <section class="group stats">
-        <h2>Stats</h2>
+      <details class="group collapsible" open>
+        <summary><h2>Stats</h2></summary>
         <div id="stats"></div>
-      </section>
+      </details>
+
+      <details class="group collapsible">
+        <summary><h2>Traffic</h2></summary>
+        <div id="trafficControls"></div>
+      </details>
+
+      <details class="group collapsible">
+        <summary><h2>Driver model (IDM)</h2></summary>
+        <div id="driverControls"></div>
+      </details>
+
+      <details class="group collapsible">
+        <summary><h2>Simulation</h2></summary>
+        <div id="simControls"></div>
+      </details>
     </aside>
 
     <main id="stage">

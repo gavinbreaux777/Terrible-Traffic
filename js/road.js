@@ -78,6 +78,21 @@
         const gap = this.stopLine - v.s;
         if (gap >= 0) return { gap, leadSpeed: 0 };
       }
+
+      // Frontmost car on a free-flowing corner: look through the bend to the
+      // first car on the continuation road so cars don't pile into the corner.
+      // The two segments behave as one continuous lane.
+      if (this._corner && this.outgoing.length === 1) {
+        const next = this.outgoing[0];
+        if (next.vehicles.length) {
+          let leadS = Infinity, leadV = 0;
+          for (const u of next.vehicles) if (u.s < leadS) { leadS = u.s; leadV = u.v; }
+          // Distance to that car: remaining road on this segment + its position.
+          const gap = (this.length - v.s) + leadS - carLen;
+          return { gap: Math.max(gap, 0), leadSpeed: leadV };
+        }
+      }
+
       return { gap: Infinity, leadSpeed: v.v };
     }
   }

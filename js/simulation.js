@@ -98,6 +98,20 @@
     // to random selection if the router returns null or no route is set.
     pickOutgoing(road, carLen, veh) {
       if (!road.outgoing.length) return null;
+
+      // Plain corner (forced bend, exactly one way out): a car can only go one
+      // direction, so transfer it through unconditionally — no room check, no
+      // route matching. This keeps cars flowing freely around bends the same way
+      // they would on a single straight road, and keeps a routed car's waypoint
+      // list in sync by consuming the corner waypoint as it passes.
+      if (road._corner && road.outgoing.length === 1) {
+        const next = road.outgoing[0];
+        if (veh && veh.route && veh.route.length && veh.route[0] === next._nkTo) {
+          veh.route.shift(); // stay in sync with the planned route
+        }
+        return next;
+      }
+
       const candidates = road.outgoing.filter(r => this.hasRoom(r, carLen));
       if (!candidates.length) return null;
 
@@ -131,11 +145,14 @@
         if (useExits) {
           // If there are no exit nodes at all, nowhere to route — suppress spawn.
           if (!exitNodes || exitNodes.length === 0) return;
-          // Explicit exit nodes: pick a random reachable exit and route to it.
-          // Shuffle so we don't always try the same one first.
+          // A car must travel to an exit node *other than the portal it spawned
+          // from*. With a single entry/exit node there is no valid destination,
+          // so the spawn is suppressed.
+          const originNk = road._nkFrom;
           const shuffled = exitNodes.slice().sort(() => Math.random() - 0.5);
           let assigned = false;
           for (const destNk of shuffled) {
+            if (destNk === originNk) continue; // can't exit where we entered
             if (destNk === road._nkTo) continue; // already at an exit node
             const route = TT.router.findRoute(this.world.navGraph, road._nkTo, destNk);
             if (route && route.length > 1) {

@@ -290,14 +290,20 @@
       // Wire outgoing: for each road arriving at node N, connect to all roads
       // departing N except the U-turn (the road going back the way this one came).
       // Skip roads already marked as sinks (their outgoing is already locked to []).
+      // Plain corners (1 in, 1 out after excluding U-turn, no intersection type) are
+      // marked _corner so the simulation skips the hasRoom check and cars flow freely.
       for (const nk in nodeRoads) {
         const { incoming, departing } = nodeRoads[nk];
+        const nodeType = this.nodes[nk] && this.nodes[nk].type;
+        const isCornerNode = !nodeType && incoming.length === 2 && departing.length === 2;
         for (const { road, fromDir } of incoming) {
           if (sinks.has(road)) continue;
-          const uTurnDir = OPP[fromDir]; // would go back toward the road's origin
-          road.outgoing = departing
+          const uTurnDir = OPP[fromDir];
+          const outs = departing
             .filter(dep => dep.toDir !== uTurnDir)
             .map(dep => dep.road);
+          road.outgoing = outs;
+          if (isCornerNode && outs.length === 1) road._corner = true;
         }
       }
 

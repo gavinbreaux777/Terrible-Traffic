@@ -24,6 +24,9 @@
     const playBtn = document.getElementById('playPause');
     const resetBtn = document.getElementById('reset');
     const disturbBtn = document.getElementById('disturb');
+    const playBtnBuild = document.getElementById('playPauseBuild');
+    const resetBtnBuild = document.getElementById('resetBuild');
+    const disturbBtnBuild = document.getElementById('disturbBuild');
     const scenarioSel = document.getElementById('scenario');
     const scenarioTabBtn = document.getElementById('tabScenario');
     const buildTabBtn = document.getElementById('tabBuild');
@@ -48,9 +51,17 @@
       if (key === 'carCount' && scenarioDef().caps.includes('fixedCount')) sim.reset();
     };
 
+    function syncPlayLabel() {
+      const label = running ? 'Pause' : 'Play';
+      playBtn.textContent = label;
+      playBtnBuild.textContent = label;
+    }
+
     function refreshPanel() {
       TT.ui.buildControls(params, onControlChange, scenarioDef());
-      disturbBtn.style.display = scenarioDef().disturb ? '' : 'none';
+      const showDisturb = scenarioDef().disturb;
+      disturbBtn.style.display = showDisturb ? '' : 'none';
+      disturbBtnBuild.style.display = showDisturb ? '' : 'none';
     }
     refreshPanel();
 
@@ -94,16 +105,20 @@
       });
     });
 
-    playBtn.addEventListener('click', () => {
+    function togglePlay() {
       running = !running;
-      playBtn.textContent = running ? 'Pause' : 'Play';
+      syncPlayLabel();
       if (running) last = performance.now();
-    });
+    }
+    function doReset() { if (builderMode) rebuild(); else sim.reset(); }
+    function doDisturb() { sim.disturb(); }
 
-    resetBtn.addEventListener('click', () => {
-      if (builderMode) rebuild(); else sim.reset();
-    });
-    disturbBtn.addEventListener('click', () => sim.disturb());
+    playBtn.addEventListener('click', togglePlay);
+    playBtnBuild.addEventListener('click', togglePlay);
+    resetBtn.addEventListener('click', doReset);
+    resetBtnBuild.addEventListener('click', doReset);
+    disturbBtn.addEventListener('click', doDisturb);
+    disturbBtnBuild.addEventListener('click', doDisturb);
 
     scenarioSel.addEventListener('change', () => {
       sim.build(scenarioSel.value);
